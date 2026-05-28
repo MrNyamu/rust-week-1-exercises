@@ -19,8 +19,8 @@ pub struct Utxo {
 /// Calculate the total Bitcoin reward for a given number of mined blocks.
 pub fn calculate_total_reward(blocks_mined: u64) -> f64 {
     // TODO: Multiply blocks_mined by MINING_REWARD and return result
-   let blocks_mined = blocks_mined as f64;
-    let result= blocks_mined * MINING_REWARD;
+    let blocks_mined = blocks_mined as f64;
+    let result = blocks_mined * MINING_REWARD;
     return result;
 }
 
@@ -28,8 +28,8 @@ pub fn calculate_total_reward(blocks_mined: u64) -> f64 {
 pub fn is_valid_tx_fee(fee: f64) -> bool {
     // TODO: Check if fee is between 0.00001 and 0.01 BTC (inclusive)
     if (0.0001..=0.01).contains(&fee) {
-        return true;    
-    } 
+        return true;
+    }
     return false;
 }
 
@@ -59,13 +59,13 @@ pub fn tx_priority(size_bytes: u64, fee_btc: f64) -> &'static str {
 /// Return true if the network string equals "mainnet" (case-insensitive).
 pub fn is_mainnet(network: &str) -> bool {
     let network = network.to_lowercase();
-    network == "mainnet"   
+    network == "mainnet"
 }
 
 /// Return true if value is in the inclusive range 100..=200.
 pub fn is_in_range(value: i64) -> bool {
     // TODO: Check if 100 <= value <= 200
-   (100..=200).contains(&value) 
+    (100..=200).contains(&value)
 }
 
 /// Return true if both references point to the exact same object in memory.

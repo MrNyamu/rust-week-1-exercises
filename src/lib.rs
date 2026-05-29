@@ -1,8 +1,6 @@
 use core::{
     iter::Iterator,
-    ops::Index,
     option::Option::{None, Some},
-    result::{self, Result::Ok},
 };
 use std::collections::HashMap;
 

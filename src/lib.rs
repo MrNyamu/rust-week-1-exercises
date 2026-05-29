@@ -30,7 +30,7 @@ pub fn calculate_total_reward(blocks_mined: u64) -> f64 {
 /// Return true if the transaction fee is between 0.00001 and 0.01 BTC.
 pub fn is_valid_tx_fee(fee: f64) -> bool {
     // TODO: Check if fee is between 0.00001 and 0.01 BTC (inclusive)
-    if (0.0001..=0.01).contains(&fee) {
+    if (0.00001..=0.01).contains(&fee) {
         return true;
     }
     return false;
@@ -51,11 +51,11 @@ pub fn tx_priority(size_bytes: u64, fee_btc: f64) -> &'static str {
     let result = fee_btc / size_bytes;
 
     if result > 0.00005 {
-        return "High";
+        return "high";
     } else if result > 0.00001 {
-        return "Medium";
+        return "medium";
     } else {
-        return "Low";
+        return "low";
     }
 }
 
@@ -104,7 +104,7 @@ pub fn find_high_fee(fee_list: &[f64]) -> Option<(usize, f64)> {
 /// Return basic wallet details as a tuple of (name, balance).
 pub fn get_wallet_details() -> (String, f64) {
     // TODO: Return a tuple with wallet name and balance
-    (String::from("Phoenix wallet"), 20.0)
+    (String::from("satoshi_wallet"), 50.0)
 }
 
 /// Get the status of a transaction from the mempool or "not found".
@@ -158,9 +158,9 @@ pub fn validate_block_height(height: i64) -> (bool, String) {
     // TODO: Check that height is within a realistic range (<= 800_000)
     // TODO: Return (true, "Valid block height") otherwise
     if height < 0 {
-        (false, String::from("negative height message"))
+        (false, String::from("negative block height"))
     } else if height > 800_000 {
-        (false, String::from("too high message"))
+        (false, String::from("unrealistic block height"))
     } else {
         (true, String::from("Valid block height"))
     }
@@ -214,11 +214,11 @@ pub fn create_utxo(
 // Implement extract_tx_version function below
 pub fn extract_tx_version(raw_tx_hex: &str) -> Result<u32, String> {
     if raw_tx_hex.len() < 8 {
-        return Err(String::from("Raw transaction too short"));
+        return Err(String::from("Transaction data too short"));
     }
 
-    let version_hex = &raw_tx_hex[0..8];
-    let version = u32::from_str_radix(version_hex, 16).map_err(|e| e.to_string())?;
+    let bytes = hex::decode(&raw_tx_hex[0..8])
+        .map_err(|e| format!("Hex decode error: {}", e))?;
 
-    Ok(version)
+    Ok(u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]))
 }

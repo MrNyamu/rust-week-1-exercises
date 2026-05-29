@@ -41,7 +41,7 @@ pub fn is_valid_tx_fee(fee: f64) -> bool {
 /// Return true if the wallet balance is greater than 50.0 BTC.
 pub fn is_large_balance(balance: f64) -> bool {
     // TODO: Compare balance to 50.0 and return result
-    (balance > 50.0)
+    balance > 50.0
 }
 
 /// Return the priority of a transaction ("high", "medium", "low") based on fee rate.
@@ -81,7 +81,7 @@ pub fn is_same_wallet<T>(wallet1: &T, wallet2: &T) -> bool {
 
 /// Normalize a Bitcoin address by trimming whitespace and lowercasing.
 pub fn normalize_address(address: &str) -> String {
-    address.trim().to_lowercase();
+    address.trim().to_lowercase()
 }
 
 /// Append a new UTXO to the list and return the updated list.
@@ -97,7 +97,7 @@ pub fn find_high_fee(fee_list: &[f64]) -> Option<(usize, f64)> {
     // TODO: Iterate with enumerate and return the first (index, fee) where fee > 0.005
     for (index, item) in fee_list.iter().enumerate() {
         if *item > 0.005 {
-            return Some((index, fee_list));
+            return Some((index, *item));
         }
     }
     None
@@ -115,7 +115,7 @@ pub fn get_tx_status(tx_pool: &HashMap<String, String>, txid: &str) -> String {
     tx_pool
         .get(txid)
         .unwrap_or(&String::from("not found"))
-        .to_string();
+        .to_string()
 }
 
 /// Destructure wallet_info and format a status string.
@@ -142,7 +142,7 @@ pub fn generate_address(prefix: &str) -> String {
     let mut suffix = String::new();
     let needed_length = 32 - prefix.len();
 
-    for i in 0..needed_length {
+    for _i in 0..needed_length {
         use rand::Rng;
         let mut rng = rand::thread_rng();
         let idx = rng.gen_range(0..charset.len());

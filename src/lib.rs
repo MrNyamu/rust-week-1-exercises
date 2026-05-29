@@ -1,4 +1,9 @@
-use core::result;
+use core::{
+    iter::Iterator,
+    ops::Index,
+    option::Option::{None, Some},
+    result::{self, Result::Ok},
+};
 use std::collections::HashMap;
 
 // Name Assignment (variables and constants)
@@ -76,51 +81,77 @@ pub fn is_same_wallet<T>(wallet1: &T, wallet2: &T) -> bool {
 
 /// Normalize a Bitcoin address by trimming whitespace and lowercasing.
 pub fn normalize_address(address: &str) -> String {
-    normalized_address = address.trim().to_lowercase();
+    address.trim().to_lowercase();
 }
 
 /// Append a new UTXO to the list and return the updated list.
 pub fn add_utxo(utxos: Vec<Utxo>, new_utxo: Utxo) -> Vec<Utxo> {
     // TODO: Push new_utxo into utxos and return it
-    todo!()
+    let mut utxos = utxos;
+    utxos.push(new_utxo);
+    return utxos;
 }
 
 /// Find the first transaction with a fee greater than 0.005 BTC.
 pub fn find_high_fee(fee_list: &[f64]) -> Option<(usize, f64)> {
     // TODO: Iterate with enumerate and return the first (index, fee) where fee > 0.005
-    todo!()
+    for (index, item) in fee_list.iter().enumerate() {
+        if *item > 0.005 {
+            return Some((index, fee_list));
+        }
+    }
+    None
 }
 
 /// Return basic wallet details as a tuple of (name, balance).
 pub fn get_wallet_details() -> (String, f64) {
     // TODO: Return a tuple with wallet name and balance
-    todo!()
+    (String::from("Phoenix wallet"), 20.0)
 }
 
 /// Get the status of a transaction from the mempool or "not found".
 pub fn get_tx_status(tx_pool: &HashMap<String, String>, txid: &str) -> String {
     // TODO: Look up txid in tx_pool, returning the status or "not found"
-    todo!()
+    tx_pool
+        .get(txid)
+        .unwrap_or(&String::from("not found"))
+        .to_string();
 }
 
 /// Destructure wallet_info and format a status string.
 pub fn unpack_wallet_info(wallet_info: (String, f64)) -> String {
     // TODO: Destructure the tuple into (name, balance) and format the result
     // Expected format: "Wallet <name> has balance: <balance> BTC"
-    todo!()
+    let (name, balance) = wallet_info;
+
+    format!("Wallet {} has balance: {} BTC", name, balance)
 }
 
 /// Convert BTC to satoshis (1 BTC = 100,000,000 sats).
 pub fn calculate_sats(btc: f64) -> u64 {
     // TODO: Multiply btc by BTC_TO_SATS and return as u64
-    todo!()
+    let calculated_sats = (btc * BTC_TO_SATS as f64) as u64;
+    calculated_sats
 }
 
 /// Generate a mock Bitcoin address of length 32 with the given prefix.
 pub fn generate_address(prefix: &str) -> String {
     // TODO: Build a random suffix of (32 - prefix.len()) chars from [a-z0-9]
     // TODO: Concatenate prefix + suffix and return
-    todo!()
+    let charset = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let mut suffix = String::new();
+    let needed_length = 32 - prefix.len();
+
+    for i in 0..needed_length {
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+        let idx = rng.gen_range(0..charset.len());
+        let ch = charset.chars().nth(idx).unwrap();
+        suffix.push(ch);
+    }
+
+    let address = prefix.to_string() + &suffix;
+    address
 }
 
 /// Validate a Bitcoin block height. Returns (is_valid, message).
@@ -128,7 +159,13 @@ pub fn validate_block_height(height: i64) -> (bool, String) {
     // TODO: Check that height is not negative
     // TODO: Check that height is within a realistic range (<= 800_000)
     // TODO: Return (true, "Valid block height") otherwise
-    todo!()
+    if height < 0 {
+        (false, String::from("negative height message"))
+    } else if height > 800_000 {
+        (false, String::from("too high message"))
+    } else {
+        (true, String::from("Valid block height"))
+    }
 }
 
 /// Compute the block reward (in sats) for each block height based on the halving schedule.
@@ -136,14 +173,26 @@ pub fn halving_schedule(blocks: &[u64]) -> HashMap<u64, u64> {
     // TODO: Base reward is 50 * 100_000_000 sats; halving interval is 210_000 blocks
     // TODO: For each block: halvings = block / 210_000; reward = base >> halvings
     // TODO: Insert (block, reward) into the result HashMap
-    todo!()
+    let base = 50 * BTC_TO_SATS;
+    let mut map: HashMap<u64, u64> = HashMap::new();
+
+    for block in blocks.iter() {
+        let halvings = block / 210_000;
+        let reward = base >> halvings;
+        map.insert(*block, reward);
+    }
+    map
 }
 
 /// Find the UTXO with the smallest value that meets or exceeds target.
 pub fn find_utxo_with_min_value(utxos: &[Utxo], target: u64) -> Option<Utxo> {
     // TODO: Filter UTXOs to those with value >= target
     // TODO: Return the one with the smallest value, or None if none qualify
-    todo!()
+    utxos
+        .iter()
+        .filter(|u| u.value >= target)
+        .min_by_key(|u| u.value)
+        .cloned()
 }
 
 /// Create a UTXO map from txid, vout, and arbitrary extra string fields.
@@ -154,10 +203,24 @@ pub fn create_utxo(
 ) -> HashMap<String, String> {
     // TODO: Build a base map with "txid" and "vout" (as string)
     // TODO: Merge extra into the base map and return
-    todo!()
+    let mut map = HashMap::new();
+    map.insert(String::from("txid"), txid.to_string());
+    map.insert(String::from("vout"), vout.to_string());
+
+    for (key, value) in extra {
+        map.insert(key, value);
+    }
+    map
 }
 
 // Implement extract_tx_version function below
 pub fn extract_tx_version(raw_tx_hex: &str) -> Result<u32, String> {
-    todo!()
+    if raw_tx_hex.len() < 8 {
+        return Err(String::from("Raw transaction too short"));
+    }
+
+    let version_hex = &raw_tx_hex[0..8];
+    let version = u32::from_str_radix(version_hex, 16).map_err(|e| e.to_string())?;
+
+    Ok(version)
 }

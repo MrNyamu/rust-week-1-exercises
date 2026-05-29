@@ -217,8 +217,7 @@ pub fn extract_tx_version(raw_tx_hex: &str) -> Result<u32, String> {
         return Err(String::from("Transaction data too short"));
     }
 
-    let bytes = hex::decode(&raw_tx_hex[0..8])
-        .map_err(|e| format!("Hex decode error: {}", e))?;
+    let bytes = hex::decode(&raw_tx_hex[0..8]).map_err(|e| format!("Hex decode error: {}", e))?;
 
     Ok(u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]))
 }
